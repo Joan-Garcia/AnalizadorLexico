@@ -6,12 +6,12 @@ import java.util.ArrayList;
 public class AnalizadorLexico {
   private final String[][] listaPalabrasReservadas;
   private final ArrayList<ArrayList<String>> simbolos;
-  private final ArrayList<ArrayList<String>> palabrasReservadas;
+  private final ArrayList<String> palabrasReservadas;
   private final ArrayList<ArrayList<String>> tokens;
   private final ArrayList<String> errores;
   
   public AnalizadorLexico(){
-    listaPalabrasReservadas = new String[3][1];
+    listaPalabrasReservadas = new String[4][2];
     simbolos = new ArrayList();
     palabrasReservadas = new ArrayList();
     tokens = new ArrayList();
@@ -31,8 +31,8 @@ public class AnalizadorLexico {
     for (int i = 0; i < 2; i++)
       simbolos.add(new ArrayList());
     
-    for (int i = 0; i < 2; i++) 
-      palabrasReservadas.add(new ArrayList());
+//    for (int i = 0; i < 2; i++) 
+//      palabrasReservadas.add(new ArrayList());
     
     for (int i = 0; i < 3; i++) 
       tokens.add(new ArrayList());
@@ -47,76 +47,85 @@ public class AnalizadorLexico {
     error = false;
     palabra = "";
     estado = inicio = fin = 0;
-    
-    switch(estado){
-      case 0:
-        if(esMinuscula(programa.charAt(inicio))){                               //Si la palabra empieza con minúscula, es una palabra reservada o error.
-          palabra += programa.charAt(inicio);
-          estado = 1;
+      System.out.println(programa.length());
+    while(fin <= (programa.length()-1))
+      switch(estado){
+        case 0:
+          if(esMinuscula(programa.charAt(inicio))){                               //Si la palabra empieza con minúscula, es una palabra reservada o error.
+            palabra += programa.charAt(inicio);
+            estado = 1;
+            break;
+          } else if (!esMinuscula(programa.charAt(inicio))){                      //Si la palabra empieza con mayúscula.
+            palabra += programa.charAt(inicio);
+            estado = 3;
+            break;
+          }
+        case 1:                                                                   //Verifica que la palabra es una palabra reservada o un error.
+          while(!esEspacio(programa.charAt(fin + 1)) && (fin + 1)<=(programa.length())){                            //Mientras el siguiente caracter no sea un espacio
+            if(esMinuscula(programa.charAt(fin + 1))){                            //si es minúscula, puede ser una palabra reservada.
+              palabra += programa.charAt(fin + 1);
+              fin++;
+                System.out.println(palabra);
+            }else{                                                                //si no, es un error.
+              error = true;
+              palabra += programa.charAt(fin + 1);
+              fin++;
+            }
+          }
+          if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
+            if(esPalabraReservada(palabra)){                                      //Si esta en lista de palabras reservadas
+              palabrasReservadas.add(palabra);                                    //Agregala a la tabla de palabras reservadas.
+            } else {                                                              //Si no está, es un error:
+              errores.add(palabra);                                               //Añadir a tabla de errores
+            }
+          } else {
+              errores.add(palabra);
+          }
+          //Se termina el análisis:
+          palabra = "";
+          fin+=2;
+          inicio = fin;
+          estado = 0;
+          error = false;
           break;
-        } else if (!esMinuscula(programa.charAt(inicio))){                      //Si la palabra empieza con mayúscula.
-          palabra += programa.charAt(inicio);
-          estado = 3;
+        case 3:
+          if((fin + 1)<=(programa.length()))
+          while(!esEspacio(programa.charAt(fin + 1)) && (fin + 1)<=(programa.length())){                            //Mientras no siga un espacio
+            if(esMinuscula(programa.charAt(fin + 1)) ||                           //Verifica si es minúscula, guión bajo o número
+               esGuionBajo(programa.charAt(fin + 1)) ||
+               esNumero(programa.charAt(fin + 1))){
+              palabra += programa.charAt(fin + 1);
+              fin++;
+            }else{                                                                //si no, es un error.
+              error = true;
+              palabra += programa.charAt(fin + 1);
+              fin++;
+            }
+          }
+          if(esGuionBajo(palabra.charAt(palabra.length()-1)))                       //Verifica que el último caracter de la palabra no sea, 
+            error = true;                                                         //guión bajo.
+          if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
+            simbolos.get(0).add(palabra);                                         //Agrega la palabra a la columna lexema en la tabla se simbolos.
+            simbolos.get(1).add("Identificador");                                 //Agrega su clasificación.
+            tokens.get(0).add(palabra);                                           //Agrega la palabra a la columna lexema a la tabla de tokens.
+            tokens.get(0).add("Identificador");                                   //Agrega su clasificación.
+            tokens.get(0).add("400");                                             //Agrega el Atributo de Identificador.
+          } else {
+            errores.add(palabra);
+          }
+          //Se termina el análisis:
+          palabra = "";
+          inicio = fin;
+          estado = 0;
+          error = false;
           break;
-        }
-      case 1:                                                                   //Verifica que la palabra es una palabra reservada o un error.
-        while(!esEspacio(programa.charAt(fin + 1))){                            //Mientras el siguiente caracter no sea un espacio
-          if(esMinuscula(programa.charAt(fin + 1))){                            //si es minúscula, puede ser una palabra reservada.
-            palabra += programa.charAt(fin + 1);
-            fin++;
-          }else{                                                                //si no, es un error.
-            error = true;
-            palabra += programa.charAt(fin + 1);
-            fin++;
-          }
-        }
-        if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
-          if(esPalabraReservada(palabra)){                                        //Si esta en lista de palabras reservadas
-            //AÑADIR PALABRA RESERVADA
-          } else {                                                                //Si no está, es un error:
-            //AÑADIR A TABLA ERRORES                                              //Añadir a tabla de errores
-          }
-        } else {
-            //AÑADIR A TABLA DE ERRORES
-        }
-        //Se termina el análisis:
-        palabra = "";
-        inicio = fin;
-        estado = 0;
-        error = false;
-        break;
-      case 3:
-        while(!esEspacio(programa.charAt(fin + 1))){                            //Mientras no siga un espacio
-          if(esMinuscula(programa.charAt(fin + 1)) ||                           //Verifica si es minúscula, guión bajo o número
-             esGuionBajo(programa.charAt(fin + 1)) ||
-             esNumero(programa.charAt(fin + 1))){
-            palabra += programa.charAt(fin + 1);
-            fin++;
-          }else{                                                                //si no, es un error.
-            error = true;
-            palabra += programa.charAt(fin + 1);
-            fin++;
-          }
-        }
-        if(esGuionBajo(palabra.charAt(palabra.length())))                       //Verifica que el último caracter de la palabra no sea, 
-          error = true;                                                         //guión bajo.
-        if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
-          //Añadir a tablas
-        } else {
-          //AÑADIR A TABLA DE ERRORES
-        }
-        //Se termina el análisis:
-        palabra = "";
-        inicio = fin;
-        estado = 0;
-        error = false;
-        break;
 
-    }
+      }
+    
   }
   
   public boolean esMinuscula(char c){
-    return Character.isUpperCase(c);
+    return Character.isLowerCase(c);
   }
   
   public boolean esEspacio(char c){
@@ -138,7 +147,16 @@ public class AnalizadorLexico {
     return false;
   }
   
+  public ArrayList<ArrayList<String>> getTablaSimbolos(){
+    return simbolos;
+  }
   
+  public ArrayList<ArrayList<String>> getTablaTokens(){
+    return tokens;
+  }
   
+  public ArrayList<String> getTablaPalabrasReservadas(){
+    return palabrasReservadas;
+  }
   
 }
