@@ -124,23 +124,104 @@ public class AnalizadorLexico {
     
   }
   
-  public boolean esMinuscula(char c){
+  public void automata(String programa){
+    String palabra;
+    int estado, inicio, fin;
+    
+    palabra = "";
+    estado = inicio = fin = 0;
+    
+    switch(estado){
+      case 0:
+        if(esSimbolo(programa.charAt(inicio))){ 
+          estado = 2;                                   
+          break;
+        } else if(esNumero(programa.charAt(inicio))){
+          estado = 5;
+          break;
+        } else if(esMayuscula(programa.charAt(inicio))){
+          
+        }
+        
+      case 2:                                               // SÍMBOLO
+        if(esSimbolo(programa.charAt(inicio))){
+          /* Añadir a las listas ***
+            Símbolo. Token = ASCII
+          */
+          inicio++;
+          fin++;
+          estado = 2;
+          break;
+        } else {
+          estado = 0;
+          break;
+        }
+      case 5:
+        if(esNumero(programa.charAt(inicio))){              // NÚMERO ENTERO
+          palabra += programa.charAt(inicio);             //Guardamos el número
+          inicio++;
+          fin++;
+          estado = 5;
+          break;
+        } else if (esPunto(programa.charAt(inicio))){       // sigue un punto.
+          palabra += programa.charAt(inicio);             //Guardamos el punto
+          inicio++;
+          fin++;
+          estado = 6;                                     //Es flotante
+          break;
+        } else{                                       //Termina el número entero
+          /* Añadir a las listas ***
+            Número entero. Token = 300
+          */
+          palabra = "";
+          estado = 0;
+          break;
+        }
+      case 6:                                             // NÚMERO FLOTANTE
+        if(esNumero(programa.charAt(inicio))){
+          palabra += programa.charAt(inicio); 
+          inicio++;
+          fin++;
+          estado = 6;
+          break;
+        } else {                                      //Termina el número float
+          /* Añadir a las listas **
+            Número flotante. Token = 500
+          */
+          palabra = "";
+          estado = 0;
+          break;
+        }
+        
+    }
+  }
+  
+  private boolean esPunto(char c){
+    return c == '.';
+  }
+  
+  private boolean esSimbolo(char c){
+    return c == ';' || c == '=' || c == '+' || c == '-' || c == '*' || 
+           c == '(' || c == ')'; 
+  }
+  
+  private boolean esMinuscula(char c){
     return Character.isLowerCase(c);
   }
   
-  public boolean esEspacio(char c){
+  private boolean esEspacio(char c){
     return Character.isSpaceChar(c);
   }
   
-  public boolean esGuionBajo(char c){
+  private boolean esGuionBajo(char c){
     return new Character(c).equals('_');
   }
   
-  public boolean esNumero(char c){
+  private boolean esNumero(char c){
     return Character.isDigit(c);
   }
   
-  public boolean esPalabraReservada(String palabra){
+  private boolean esPalabraReservada(String palabra){
     for (int i = 0; i < listaPalabrasReservadas[0].length; i++)
       if(palabra.equals(listaPalabrasReservadas[i][0]))
         return true;
