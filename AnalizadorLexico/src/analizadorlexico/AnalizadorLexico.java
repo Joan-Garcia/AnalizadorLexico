@@ -127,15 +127,26 @@ public class AnalizadorLexico {
   public void automata(String programa){
     String palabra;
     int estado, inicio;
-    
+    boolean error  = false;
     palabra = "";
     estado = inicio = 0;
-    
+    System.out.println(programa);
     while(inicio != programa.length())
-    switch(estado){ //(...) = 5. + .05
+    switch(estado){
       case 0:
         if (esSimbolo(programa.charAt(inicio))){ 
           estado = 2;                                   
+          break;
+        } else if(error){
+          palabra += programa.charAt(inicio);
+          if(esEspacio(programa.charAt(inicio + 1))){
+            System.out.println("Error en: " + palabra + " No es un identificador valido.");
+            errores.add(palabra);
+            palabra = "";
+            error = false;
+          }
+          inicio++;
+          estado = 0;
           break;
         } else if(esNumero(programa.charAt(inicio))){
           estado = 5;
@@ -160,15 +171,14 @@ public class AnalizadorLexico {
               inicio++;
             }
           }
-          if(esEspacio(programa.charAt(inicio + 1))/*|| 
+          if(esEspacio(programa.charAt(inicio + 1))|| 
              esSimbolo(programa.charAt(inicio + 1))  ||
              esNumero(programa.charAt(inicio + 1))   ||
              esMinuscula(programa.charAt(inicio + 1))||
              esMayuscula(programa.charAt(inicio + 1))  
-             */){
-            /* 
-              Añadir a errores
-            */
+             ){
+            System.out.println("Error en: " + palabra + " Carácter no valido.");
+            errores.add(palabra);
             palabra = "";
           }
           inicio++;
@@ -186,13 +196,16 @@ public class AnalizadorLexico {
             /* Añadirla a las listas **
               Símbolo. Token = tokenPalabraRervada(palabra)
             */
+            palabrasReservadas.add(palabra);
+            tokens.get(0).add(palabra);
+            tokens.get(1).add("Palabra reservada");
+            tokens.get(2).add(String.valueOf(tokenPalabraReservada(palabra)));
             palabra = "";
             inicio++;
             estado = 0;
           } else {
-            /* 
-              Añadirla a lista de erorres **
-            */
+            System.out.println("Error en: " + palabra + " No es una palabra reservada ni un identificador valido.");
+            errores.add(palabra);
             palabra = "";
             inicio++;
             estado = 0;
@@ -203,6 +216,9 @@ public class AnalizadorLexico {
           /* Añadir a las listas ***
             Símbolo. Token = ASCII
           */
+          tokens.get(0).add(String.valueOf(programa.charAt(inicio)));
+          tokens.get(1).add("Carácter Simple");
+          tokens.get(2).add(String.valueOf(valorASCII(programa.charAt(inicio))));
           inicio++;
           estado = 2;
           break;
@@ -217,6 +233,11 @@ public class AnalizadorLexico {
           estado = 3;
           break;
         } else if(esGuionBajo(programa.charAt(inicio))){
+          if(esEspacio(programa.charAt(inicio + 1))){
+            estado = 0;
+            error = true;
+            break;
+          }
           palabra += programa.charAt(inicio);
           inicio++;
           estado = 3;
@@ -227,9 +248,20 @@ public class AnalizadorLexico {
           estado = 3;
           break;
         } else{
+          if(esMayuscula(programa.charAt(inicio)) && !esSimbolo(programa.charAt(inicio)) && 
+                  !esEspacio(programa.charAt(inicio))){
+            estado = 0;
+            error = true;
+            break;
+          }
           /* Añadir a las listas ***
             Identificador. Token = 400
           */
+          simbolos.get(0).add(palabra);                                         //Agrega la palabra a la columna lexema en la tabla se simbolos.
+          simbolos.get(1).add("Identificador");                                 //Agrega su clasificación.
+          tokens.get(0).add(palabra);                                           //Agrega la palabra a la columna lexema a la tabla de tokens.
+          tokens.get(1).add("Identificador");                                   //Agrega su clasificación.
+          tokens.get(2).add("400");                                             //Agrega el Atributo de Identificador.
           palabra = "";
           estado = 0;
           break;
@@ -243,9 +275,8 @@ public class AnalizadorLexico {
         } else if (esPunto(programa.charAt(inicio))){  // sigue un punto.
           palabra += programa.charAt(inicio);          //Guardamos el punto
           if (!esNumero(programa.charAt(inicio + 1))){
-            /* 
-              Añadirla a lista de erorres **
-            */
+            System.out.println("Error en: " + palabra + " No hay un número despues del punto.");
+            errores.add(palabra);
             palabra = "";
             inicio++;
             estado = 0;
@@ -255,9 +286,19 @@ public class AnalizadorLexico {
             break;
           }
         } else {                                       //Termina el número entero
+          if(esMayuscula(programa.charAt(inicio)) || 
+                  !esSimbolo(programa.charAt(inicio)) ||
+                  esMinuscula(programa.charAt(inicio))){
+            estado = 0;
+            error = true;
+            break;
+          }
           /* Añadir a las listas ***
             Número entero. Token = 300
           */
+          tokens.get(0).add(palabra);
+          tokens.get(1).add("Número Entero");
+          tokens.get(2).add("300");
           palabra = "";
           estado = 0;
           break;
@@ -272,6 +313,9 @@ public class AnalizadorLexico {
           /* Añadir a las listas **
             Número flotante. Token = 500
           */
+          tokens.get(0).add(palabra);
+          tokens.get(1).add("Número de Punto Flotante");
+          tokens.get(2).add("500");
           palabra = "";
           estado = 0;
           break;
@@ -298,7 +342,7 @@ public class AnalizadorLexico {
   }
   
   private boolean esEspacio(char c){
-    return Character.isSpaceChar(c);
+    return Character.isWhitespace(c);
   }
   
   private boolean esGuionBajo(char c){
@@ -315,15 +359,15 @@ public class AnalizadorLexico {
   
   // Devuelve el token correspondiente a la palabra reservada.
   private int tokenPalabraReservada(String palabra){
-    for (int i = 0; i < listaPalabrasReservadas[0].length; i++)
+    for (int i = 0; i <= 3; i++)
       if(palabra.equals(listaPalabrasReservadas[i][0]))
         return Integer.parseInt(listaPalabrasReservadas[i][1]);
     return -1;
   }
   
   // Comprueba si una palabra forma parte de las palabras reservadas.
-  private boolean esPalabraReservada(String palabra){
-    for (int i = 0; i < listaPalabrasReservadas[0].length; i++)
+  public boolean esPalabraReservada(String palabra){
+    for (int i = 0; i <= 3; i++)
       if(palabra.equals(listaPalabrasReservadas[i][0]))
         return true;
     return false;
@@ -341,4 +385,7 @@ public class AnalizadorLexico {
     return palabrasReservadas;
   }
   
+  public ArrayList<String> getTablaErrores(){
+    return errores;
+  }
 }
