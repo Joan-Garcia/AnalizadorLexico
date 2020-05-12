@@ -1,7 +1,7 @@
-
 package analizadorlexico;
 
 import datos.Archivo;
+import estructurasDeDatos.ListaEnlazada;
 
 public class Main {
   Archivo file;
@@ -17,18 +17,22 @@ public class Main {
   }
   
   private void resultados(){
-    String[] r = new String[analizador.getTablaPalabrasReservadas().size()];
-    analizador.getTablaPalabrasReservadas().toArray(r);
+    ListaEnlazada temp;         //Puente para llamar al metodo toArray() de las
+                                //listas enlazadas dentro de otras listas.
+    //Impresión de la tabla de palabras reservadas:
+    String[] r = analizador.getTablaPalabrasReservadas().toArray();
     System.out.println("\nPalabras Reservadas");
     System.out.println("----------------------");
     for (String r1 : r)
       System.out.println(r1);
     System.out.println("\n");
     
-    String[] s1 = new String[analizador.getTablaSimbolos().get(0).size()];
-    String[] s2 = new String[analizador.getTablaSimbolos().get(0).size()];
-    analizador.getTablaSimbolos().get(0).toArray(s1);
-    analizador.getTablaSimbolos().get(1).toArray(s2);
+    //Impresión de la tabla de símbolos:
+    temp = (ListaEnlazada) analizador.getTablaSimbolos().get(0).getInfo();
+    String[] s1 = temp.toArray();
+    temp = (ListaEnlazada) analizador.getTablaSimbolos().get(1).getInfo();
+    String[] s2 = temp.toArray();
+    
     System.out.println("\nTabla de Simbolos");
     System.out.printf("%-20s%-20s\n", "Lexema", "Clasificación");
     System.out.println("----------------------------------");
@@ -36,12 +40,13 @@ public class Main {
       System.out.printf("%-20s%-20s\n", s1[i], s2[i]);
     System.out.println("");
     
-    String[] t1 = new String[analizador.getTablaTokens().get(0).size()];
-    String[] t2 = new String[analizador.getTablaTokens().get(0).size()];
-    String[] t3 = new String[analizador.getTablaTokens().get(0).size()];
-    analizador.getTablaTokens().get(0).toArray(t1);
-    analizador.getTablaTokens().get(1).toArray(t2);
-    analizador.getTablaTokens().get(2).toArray(t3);
+    //Impresión de la tabla de tokens:
+    temp = (ListaEnlazada) analizador.getTablaTokens().get(0).getInfo();
+    String[] t1 = temp.toArray();
+    temp = (ListaEnlazada) analizador.getTablaTokens().get(1).getInfo();
+    String[] t2 = temp.toArray();
+    temp = (ListaEnlazada) analizador.getTablaTokens().get(2).getInfo();
+    String[] t3 = temp.toArray();
     System.out.println("\nTabla de Tokens");
     System.out.printf("%-20s%-30s%-20s\n", "Lexema", "Clasificación", "Atributo");
     System.out.println("------------------------------------------------------------");
@@ -49,8 +54,8 @@ public class Main {
       System.out.printf("%-20s%-30s%-20s\n", t1[i], t2[i], t3[i]);
     System.out.println("");
     
-    String[] e = new String[analizador.getTablaErrores().size()];
-    analizador.getTablaErrores().toArray(e);
+    //Impresión de la tabla de errores:
+    String[] e = analizador.getTablaErrores().toArray();
     System.out.println("\nTabla de Errores");
     System.out.println("----------------------");
     for (String e1 : e)

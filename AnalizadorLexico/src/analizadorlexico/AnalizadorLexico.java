@@ -1,21 +1,18 @@
 package analizadorlexico;
 
-import java.util.ArrayList;
-
+import estructurasDeDatos.ListaEnlazada;
+import estructurasDeDatos.Nodo;
 
 public class AnalizadorLexico {
   private final String[][] listaPalabrasReservadas;
-  private final ArrayList<ArrayList<String>> simbolos;
-  private final ArrayList<String> palabrasReservadas;
-  private final ArrayList<ArrayList<String>> tokens;
-  private final ArrayList<String> errores;
+  private final ListaEnlazada simbolos, palabrasReservadas, tokens, errores;
   
   public AnalizadorLexico(){
     listaPalabrasReservadas = new String[4][2];
-    simbolos = new ArrayList();
-    palabrasReservadas = new ArrayList();
-    tokens = new ArrayList();
-    errores = new ArrayList();
+    simbolos = new ListaEnlazada();
+    palabrasReservadas = new ListaEnlazada();
+    tokens = new ListaEnlazada();
+    errores = new ListaEnlazada();
     
     // Llenar la lista de palabras reservadas:
     listaPalabrasReservadas[0][0] = "Palabra reservada";
@@ -29,100 +26,14 @@ public class AnalizadorLexico {
     listaPalabrasReservadas[3][1] = "602";
     
     for (int i = 0; i < 2; i++)
-      simbolos.add(new ArrayList());
+      simbolos.add(new Nodo(new ListaEnlazada()));
     
 //    for (int i = 0; i < 2; i++) 
 //      palabrasReservadas.add(new ArrayList());
     
     for (int i = 0; i < 3; i++) 
-      tokens.add(new ArrayList());
+      tokens.add(new Nodo(new ListaEnlazada()));
   }
-  
-//  @SuppressWarnings("UnusedAssignment")
-//  public void procesa(String programa){
-//    boolean error;
-//    String palabra;
-//    int estado, inicio, fin;
-//    
-//    error = false;
-//    palabra = "";
-//    estado = inicio = fin = 0;
-//      System.out.println(programa.length());
-//    while(fin <= (programa.length()-1))
-//      switch(estado){
-//        case 0:
-//          if(esMinuscula(programa.charAt(inicio))){                               //Si la palabra empieza con minúscula, es una palabra reservada o error.
-//            palabra += programa.charAt(inicio);
-//            estado = 1;
-//            break;
-//          } else if (!esMinuscula(programa.charAt(inicio))){                      //Si la palabra empieza con mayúscula.
-//            palabra += programa.charAt(inicio);
-//            estado = 3;
-//            break;
-//          }
-//        case 1:                                                                   //Verifica que la palabra es una palabra reservada o un error.
-//          while(!esEspacio(programa.charAt(fin + 1)) && (fin + 1)<=(programa.length())){                            //Mientras el siguiente caracter no sea un espacio
-//            if(esMinuscula(programa.charAt(fin + 1))){                            //si es minúscula, puede ser una palabra reservada.
-//              palabra += programa.charAt(fin + 1);
-//              fin++;
-//                System.out.println(palabra);
-//            }else{                                                                //si no, es un error.
-//              error = true;
-//              palabra += programa.charAt(fin + 1);
-//              fin++;
-//            }
-//          }
-//          if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
-//            if(esPalabraReservada(palabra)){                                      //Si esta en lista de palabras reservadas
-//              palabrasReservadas.add(palabra);                                    //Agregala a la tabla de palabras reservadas.
-//            } else {                                                              //Si no está, es un error:
-//              errores.add(palabra);                                               //Añadir a tabla de errores
-//            }
-//          } else {
-//              errores.add(palabra);
-//          }
-//          //Se termina el análisis:
-//          palabra = "";
-//          fin+=2;
-//          inicio = fin;
-//          estado = 0;
-//          error = false;
-//          break;
-//        case 3:
-//          if((fin + 1)<=(programa.length()))
-//          while(!esEspacio(programa.charAt(fin + 1)) && (fin + 1)<=(programa.length())){                            //Mientras no siga un espacio
-//            if(esMinuscula(programa.charAt(fin + 1)) ||                           //Verifica si es minúscula, guión bajo o número
-//               esGuionBajo(programa.charAt(fin + 1)) ||
-//               esNumero(programa.charAt(fin + 1))){
-//              palabra += programa.charAt(fin + 1);
-//              fin++;
-//            }else{                                                                //si no, es un error.
-//              error = true;
-//              palabra += programa.charAt(fin + 1);
-//              fin++;
-//            }
-//          }
-//          if(esGuionBajo(palabra.charAt(palabra.length()-1)))                       //Verifica que el último caracter de la palabra no sea, 
-//            error = true;                                                         //guión bajo.
-//          if(!error){                                                             //Terminamos de analizar la palabra, si no es error...
-//            simbolos.get(0).add(palabra);                                         //Agrega la palabra a la columna lexema en la tabla se simbolos.
-//            simbolos.get(1).add("Identificador");                                 //Agrega su clasificación.
-//            tokens.get(0).add(palabra);                                           //Agrega la palabra a la columna lexema a la tabla de tokens.
-//            tokens.get(0).add("Identificador");                                   //Agrega su clasificación.
-//            tokens.get(0).add("400");                                             //Agrega el Atributo de Identificador.
-//          } else {
-//            errores.add(palabra);
-//          }
-//          //Se termina el análisis:
-//          palabra = "";
-//          inicio = fin;
-//          estado = 0;
-//          error = false;
-//          break;
-//
-//      }
-//    
-//  }
   
   public void automata(String programa){
     String palabra;
@@ -141,7 +52,7 @@ public class AnalizadorLexico {
           palabra += programa.charAt(inicio);
           if(esEspacio(programa.charAt(inicio + 1))){
             System.out.println("Error en: " + palabra + " No es un identificador valido.");
-            errores.add(palabra);
+            errores.add(new Nodo(palabra));
             palabra = "";
             error = false;
           }
@@ -178,7 +89,7 @@ public class AnalizadorLexico {
              esMayuscula(programa.charAt(inicio + 1))  
              ){
             System.out.println("Error en: " + palabra + " Carácter no valido.");
-            errores.add(palabra);
+            errores.add(new Nodo(palabra));
             palabra = "";
           }
           inicio++;
@@ -196,16 +107,17 @@ public class AnalizadorLexico {
             /* Añadirla a las listas **
               Símbolo. Token = tokenPalabraRervada(palabra)
             */
-            palabrasReservadas.add(palabra);
-            tokens.get(0).add(palabra);
-            tokens.get(1).add("Palabra reservada");
-            tokens.get(2).add(String.valueOf(tokenPalabraReservada(palabra)));
+            palabrasReservadas.add(new Nodo(palabra));
+            
+            añadeFilaATokens(palabra, "Palabra reservada",
+                             String.valueOf(tokenPalabraReservada(palabra)));
+            
             palabra = "";
             inicio++;
             estado = 0;
           } else {
             System.out.println("Error en: " + palabra + " No es una palabra reservada ni un identificador valido.");
-            errores.add(palabra);
+            errores.add(new Nodo(palabra));
             palabra = "";
             inicio++;
             estado = 0;
@@ -216,9 +128,10 @@ public class AnalizadorLexico {
           /* Añadir a las listas ***
             Símbolo. Token = ASCII
           */
-          tokens.get(0).add(String.valueOf(programa.charAt(inicio)));
-          tokens.get(1).add("Carácter Simple");
-          tokens.get(2).add(String.valueOf(valorASCII(programa.charAt(inicio))));
+          
+          añadeFilaATokens(String.valueOf(programa.charAt(inicio)), 
+                           "Caracter simple", 
+                           String.valueOf(valorASCII(programa.charAt(inicio))));
           inicio++;
           estado = 2;
           break;
@@ -257,11 +170,10 @@ public class AnalizadorLexico {
           /* Añadir a las listas ***
             Identificador. Token = 400
           */
-          simbolos.get(0).add(palabra);                                         //Agrega la palabra a la columna lexema en la tabla se simbolos.
-          simbolos.get(1).add("Identificador");                                 //Agrega su clasificación.
-          tokens.get(0).add(palabra);                                           //Agrega la palabra a la columna lexema a la tabla de tokens.
-          tokens.get(1).add("Identificador");                                   //Agrega su clasificación.
-          tokens.get(2).add("400");                                             //Agrega el Atributo de Identificador.
+          
+          añadeFilaASimbolos(palabra, "Identificador");
+          añadeFilaATokens(palabra, "Identificador", "400");
+          
           palabra = "";
           estado = 0;
           break;
@@ -276,7 +188,7 @@ public class AnalizadorLexico {
           palabra += programa.charAt(inicio);          //Guardamos el punto
           if (!esNumero(programa.charAt(inicio + 1))){
             System.out.println("Error en: " + palabra + " No hay un número despues del punto.");
-            errores.add(palabra);
+            errores.add(new Nodo(palabra));
             palabra = "";
             inicio++;
             estado = 0;
@@ -296,9 +208,8 @@ public class AnalizadorLexico {
           /* Añadir a las listas ***
             Número entero. Token = 300
           */
-          tokens.get(0).add(palabra);
-          tokens.get(1).add("Número Entero");
-          tokens.get(2).add("300");
+          
+          añadeFilaATokens(palabra, "Numero entero", "300");
           palabra = "";
           estado = 0;
           break;
@@ -313,15 +224,38 @@ public class AnalizadorLexico {
           /* Añadir a las listas **
             Número flotante. Token = 500
           */
-          tokens.get(0).add(palabra);
-          tokens.get(1).add("Número de Punto Flotante");
-          tokens.get(2).add("500");
+          
+          añadeFilaATokens(palabra, "Número de punto flotante", "500");
           palabra = "";
           estado = 0;
           break;
         }
       
     }
+  }
+  
+  private void añadeFilaASimbolos(String lexema, String clasificacion){
+    ListaEnlazada temp = new ListaEnlazada();
+            
+    temp = (ListaEnlazada) simbolos.get(0).getInfo();
+    temp.add(new Nodo(lexema));
+            
+    temp = (ListaEnlazada) simbolos.get(1).getInfo();
+    temp.add(new Nodo(clasificacion));
+  }
+  
+  private void añadeFilaATokens(String lexema, String clasificacion,
+                                String atributo){
+    ListaEnlazada temp = new ListaEnlazada();
+            
+    temp = (ListaEnlazada) tokens.get(0).getInfo();
+    temp.add(new Nodo(lexema));
+            
+    temp = (ListaEnlazada) tokens.get(1).getInfo();
+    temp.add(new Nodo(clasificacion));
+            
+    temp = (ListaEnlazada) tokens.get(2).getInfo();
+    temp.add(new Nodo(atributo));
   }
   
   private boolean esPunto(char c){
@@ -373,19 +307,19 @@ public class AnalizadorLexico {
     return false;
   }
   
-  public ArrayList<ArrayList<String>> getTablaSimbolos(){
+  public ListaEnlazada getTablaSimbolos(){
     return simbolos;
   }
   
-  public ArrayList<ArrayList<String>> getTablaTokens(){
+  public ListaEnlazada getTablaTokens(){
     return tokens;
   }
   
-  public ArrayList<String> getTablaPalabrasReservadas(){
+  public ListaEnlazada getTablaPalabrasReservadas(){
     return palabrasReservadas;
   }
   
-  public ArrayList<String> getTablaErrores(){
+  public ListaEnlazada getTablaErrores(){
     return errores;
   }
 }
