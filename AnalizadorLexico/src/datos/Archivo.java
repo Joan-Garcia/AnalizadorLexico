@@ -13,7 +13,8 @@ public class Archivo {
   JFileChooser chooser;
   FileReader fr;
   BufferedReader br;
-    
+  String f;
+  
   public Archivo() {
     chooser = new JFileChooser();
   }
@@ -32,7 +33,8 @@ public class Archivo {
   public String leerArchivo() {
     String cadena = "", linea;
     try {
-      fr = new FileReader (seleccionaArchivo());
+      f = seleccionaArchivo();
+      fr = new FileReader (f);
       br = new BufferedReader(fr);
 
       while ((linea=br.readLine())!=null) {
@@ -49,5 +51,9 @@ public class Archivo {
         }
       }
     return cadena;
+  }
+  
+  public String getRutaArchivo(){
+    return f;
   }
 }

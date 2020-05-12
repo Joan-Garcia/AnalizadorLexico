@@ -41,7 +41,6 @@ public class AnalizadorLexico {
     boolean error  = false;
     palabra = "";
     estado = inicio = 0;
-    System.out.println(programa);
     while(inicio != programa.length())
     switch(estado){
       case 0:
@@ -51,7 +50,7 @@ public class AnalizadorLexico {
         } else if(error){
           palabra += programa.charAt(inicio);
           if(esEspacio(programa.charAt(inicio + 1))){
-            System.out.println("Error en: " + palabra + " No es un identificador valido.");
+            System.out.println("Error en: " + palabra);
             errores.add(new Nodo(palabra));
             palabra = "";
             error = false;
@@ -88,7 +87,7 @@ public class AnalizadorLexico {
              esMinuscula(programa.charAt(inicio + 1))||
              esMayuscula(programa.charAt(inicio + 1))  
              ){
-            System.out.println("Error en: " + palabra + " Carácter no valido.");
+            System.out.println("Error en: " + palabra);
             errores.add(new Nodo(palabra));
             palabra = "";
           }
@@ -116,7 +115,7 @@ public class AnalizadorLexico {
             inicio++;
             estado = 0;
           } else {
-            System.out.println("Error en: " + palabra + " No es una palabra reservada ni un identificador valido.");
+            System.out.println("Error en: " + palabra);
             errores.add(new Nodo(palabra));
             palabra = "";
             inicio++;
@@ -187,11 +186,12 @@ public class AnalizadorLexico {
         } else if (esPunto(programa.charAt(inicio))){  // sigue un punto.
           palabra += programa.charAt(inicio);          //Guardamos el punto
           if (!esNumero(programa.charAt(inicio + 1))){
-            System.out.println("Error en: " + palabra + " No hay un número despues del punto.");
+            System.out.println("Error en: " + palabra);
             errores.add(new Nodo(palabra));
             palabra = "";
             inicio++;
             estado = 0;
+            break;
           } else {           
             inicio++;
             estado = 6;                                     //Es flotante
@@ -209,7 +209,7 @@ public class AnalizadorLexico {
             Número entero. Token = 300
           */
           
-          añadeFilaATokens(palabra, "Numero entero", "300");
+          añadeFilaATokens(palabra, "Número entero", "300");
           palabra = "";
           estado = 0;
           break;
@@ -230,7 +230,6 @@ public class AnalizadorLexico {
           estado = 0;
           break;
         }
-      
     }
   }
   

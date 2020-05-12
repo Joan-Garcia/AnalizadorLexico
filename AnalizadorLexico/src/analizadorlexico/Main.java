@@ -61,6 +61,8 @@ public class Main {
     for (String e1 : e)
       System.out.println(e1);
     System.out.println("");
+    System.out.println("Se ha terminado de Analizar el programa: " +
+            file.getRutaArchivo());
   }
   public static void main(String[] args) {
     Main m = new Main();
