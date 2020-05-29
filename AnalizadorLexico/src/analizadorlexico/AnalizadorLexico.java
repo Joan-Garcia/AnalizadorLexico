@@ -169,8 +169,8 @@ public class AnalizadorLexico {
           /* Añadir a las listas ***
             Identificador. Token = 400
           */
-          
-          añadeFilaASimbolos(palabra, "Identificador");
+          if(!simboloRegistrado(palabra))                                       //Si no está registrado el identificador.
+            añadeFilaASimbolos(palabra, "Identificador");                         //Regístralo.
           añadeFilaATokens(palabra, "Identificador", "400");
           
           palabra = "";
@@ -241,6 +241,14 @@ public class AnalizadorLexico {
             
     temp = (ListaEnlazada) simbolos.get(1).getInfo();
     temp.add(new Nodo(clasificacion));
+  }
+  
+  // Comprueba si un símbolo ya existe en la tabla de símbolos.
+  private boolean simboloRegistrado(String lexema){
+    ListaEnlazada temp = new ListaEnlazada();
+            
+    temp = (ListaEnlazada) simbolos.get(0).getInfo();
+    return temp.exist(new Nodo(lexema));
   }
   
   private void añadeFilaATokens(String lexema, String clasificacion,

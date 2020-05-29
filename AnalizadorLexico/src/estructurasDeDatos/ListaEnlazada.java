@@ -89,6 +89,13 @@ public class ListaEnlazada {
     return size;
   }
   
+  public boolean exist(Nodo a){
+    for(Nodo temp = inicio; temp !=null ; temp = temp.getSiguiente())
+      if (a.getInfo().equals(temp.getInfo()))
+        return true;
+    return false;
+  }
+  
   /**
    * Convierte los datos de la lista en un arreglo de String
    * 
